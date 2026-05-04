@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Momentum — Habit Tracker</title>
+  <meta name="theme-color" content="#5b6af5" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#5b6af5" media="(prefers-color-scheme: dark)" />
+  <meta name="description" content="Momentum turns daily habits into coins toward real-world rewards." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Momentum" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="Momentum" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="shell">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24"><path d="M13 2L4.5 13.5H12L11 22l8.5-11.5H12L13 2Z"/></svg>
+      </div>
+      <div>
+        <div class="logo-text">Momentum</div>
+        <div class="logo-sub">habit tracker · v1.0</div>
+      </div>
+    </div>
+
+    <div class="nav-section-label">Main</div>
+    <button class="nav-link" data-screen="onboarding">
+      <svg viewBox="0 0 24 24"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2Z"/><path d="M19 12l.8 2.2L22 15l-2.2.8L19 18l-.8-2.2L16 15l2.2-.8L19 12Z"/></svg>
+      Get started
+    </button>
+    <button class="nav-link active" data-screen="today">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Today
+    </button>
+    <button class="nav-link" data-screen="rewards">
+      <svg viewBox="0 0 24 24"><path d="M20 12v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8M2 7h20v5H2zM12 22V7m0 0H7.5a2.5 2.5 0 1 1 0-5C10 2 12 7 12 7zm0 0h4.5a2.5 2.5 0 1 0 0-5C14 2 12 7 12 7z"/></svg>
+      Rewards
+    </button>
+    <button class="nav-link" data-screen="insights">
+      <svg viewBox="0 0 24 24"><path d="M3 3v18h18M7 16l4-8 4 6 3-4"/></svg>
+      Insights
+    </button>
+    <button class="nav-link" data-screen="habits">
+      <svg viewBox="0 0 24 24"><path d="m9 11 2 2 4-4M9 18h8M5 6h.01M5 12h.01M5 18h.01"/></svg>
+      All Habits
+    </button>
+
+    <div class="nav-section-label">Track</div>
+    <button class="nav-link" data-screen="tasks">
+      <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      Tasks
+    </button>
+    <button class="nav-link" data-screen="projects">
+      <svg viewBox="0 0 24 24"><path d="M3 6.5A2.5 2.5 0 0 1 5.5 4H10l2 2h6.5A2.5 2.5 0 0 1 21 8.5v8A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5v-10Z"/></svg>
+      Projects
+    </button>
+    <button class="nav-link" data-screen="fitness">
+      <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>
+      Fitness
+    </button>
+    <button class="nav-link" data-screen="sleep">
+      <svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      Sleep
+    </button>
+
+    <div class="nav-section-label">More</div>
+    <button class="nav-link" data-screen="pricing">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      Plans
+    </button>
+    <button class="nav-link" data-screen="integrations">
+      <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L11 4.93"/><path d="M14 11a5 5 0 0 0-7.07 0L4.8 13.12a5 5 0 0 0 7.07 7.07L13 19.07"/></svg>
+      Integrations
+    </button>
+    <button class="nav-link" data-screen="feedback">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Feedback
+    </button>
+    <button class="nav-link" data-screen="settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.22.6.78 1 1.42 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </button>
+
+    <div class="sidebar-bottom">
+      <button class="nav-link" id="themeToggle" data-theme-toggle>
+        <svg id="themeIcon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <span id="themeLabel">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Content ── -->
+  <main class="main">
+
+    <!-- ── Onboarding ── -->
+    <section class="screen" id="screen-onboarding">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Welcome to Momentum</div>
+          <div class="page-sub">Build habits. Earn coins. Unlock your wishlist.</div>
+        </div>
+        <button class="btn btn-primary" data-start>Enter app →</button>
+      </div>
+
+      <div class="install-banner" id="installBanner">
+        <div class="install-banner-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 16l-4-4h3V4h2v8h3l-4 4Z"/><path d="M20 18H4"/></svg>
+        </div>
+        <div>
+          <strong>Install as an app</strong>
+          <p>iPhone: open in Safari → Share → Add to Home Screen. Android: browser menu → Install app.</p>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="installBtn" hidden>Install</button>
+      </div>
+
+      <div class="onboard-hero">
+        <!-- Phone 1: Sign in -->
+        <div class="phone-mockup">
+          <div class="phone-topbar"><span>9:41</span><span>◼◼ ▲</span></div>
+          <div class="logo-mark" style="width:40px;height:40px;margin-bottom:20px">
+            <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><path d="M13 2L4.5 13.5H12L11 22l8.5-11.5H12L13 2Z"/></svg>
+          </div>
+          <div style="font-size:24px;font-weight:740;letter-spacing:-0.02em;line-height:1.1;margin-bottom:8px">Build the life<br>you want.</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5">Track habits, earn coins, unlock real rewards. No subscriptions required to start.</div>
+          <div class="form-field">
+            <label class="form-label">Your name</label>
+            <input class="form-input" id="onboardName" type="text" placeholder="e.g. Issari" />
+          </div>
+          <button class="btn btn-primary btn-full" data-start style="margin-bottom:8px">Start locally</button>
+          <button class="btn btn-ghost btn-full" data-install-guide>Install app</button>
+          <div style="font-size:11.5px;color:var(--faint);margin-top:auto;line-height:1.4">Cloud sync and social features coming in the commercial version.</div>
+        </div>
+
+        <!-- Phone 2: Pick habits -->
+        <div class="phone-mockup">
+          <div class="phone-topbar"><span>9:41</span><span>2 / 4</span></div>
+          <div style="font-size:20px;font-weight:740;margin-bottom:6px">Pick your starters</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:16px">You can add, rename, or remove habits anytime.</div>
+          <div class="starter-grid">
+            <button class="starter-btn sel" onclick="this.classList.toggle('sel')">
+              <div class="starter-emoji">💧</div>
+              <div class="starter-name">Drink water</div>
+              <div class="starter-note">8 glasses / day</div>
+            </button>
+            <button class="starter-btn" onclick="this.classList.toggle('sel')">
+              <div class="starter-emoji">🏋️</div>
+              <div class="starter-name">Workout</div>
+              <div class="starter-note">Daily session</div>
+            </button>
+            <button class="starter-btn sel" onclick="this.classList.toggle('sel')">
+              <div class="starter-emoji">📖</div>
+              <div class="starter-name">Read</div>
+              <div class="starter-note">30 min</div>
+            </button>
+            <button class="starter-btn" onclick="this.classList.toggle('sel')">
+              <div class="starter-emoji">🧘</div>
+              <div class="starter-name">Meditate</div>
+              <div class="starter-note">10 min</div>
+            </button>
+          </div>
+          <button class="btn btn-primary btn-full" style="margin-top:auto" data-start>Continue · 2 selected</button>
+        </div>
+
+        <!-- Phone 3: Set reward -->
+        <div class="phone-mockup">
+          <div class="phone-topbar"><span>9:41</span><span>4 / 4</span></div>
+          <div style="font-size:20px;font-weight:740;margin-bottom:6px">What do you want?</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:16px">One concrete reward. Specific beats vague.</div>
+          <div class="form-field">
+            <label class="form-label">Reward name</label>
+            <input class="form-input" type="text" value="Sony WH-1000XM5" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Price (USD)</label>
+            <input class="form-input" type="number" value="399" />
+          </div>
+          <div class="coin-preview">
+            <div class="coin-cell">
+              <div class="coin-cell-lbl">Price</div>
+              <div class="coin-cell-val">$399</div>
+            </div>
+            <div class="coin-cell">
+              <div class="coin-cell-lbl">Coins needed</div>
+              <div class="coin-cell-val">1,995</div>
+            </div>
+          </div>
+          <button class="btn btn-gold btn-full" style="margin-top:auto" data-start>Lock it in 🔒</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Today ── -->
+    <section class="screen active" id="screen-today">
+      <div class="page-header">
+        <div>
+          <div class="page-sub" id="todayDate">Sunday, May 4</div>
+          <div class="page-title">Today</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn-icon" data-theme-toggle title="Toggle theme">
+            <svg id="headerThemeIcon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </button>
+          <button class="btn btn-ghost btn-sm" id="headerInstallBtn" data-install-guide title="Install app">
+            <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 16l-4-4h3V4h2v8h3l-4 4Z"/><path d="M20 18H4"/></svg>
+            Install
+          </button>
+          <button class="btn btn-primary" data-open-modal="habitModal">+ Add habit</button>
+        </div>
+      </div>
+
+      <!-- Hero reward -->
+      <div class="hero-reward" id="heroReward">
+        <div class="reward-thumb" id="heroThumb" style="background-image:url('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80')"></div>
+        <div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--faint);margin-bottom:4px">Primary reward</div>
+          <div class="reward-name" id="heroName">Sony WH-1000XM5</div>
+          <div class="reward-meta" id="heroMeta">$399 · 742 / 1,995 coins</div>
+          <div class="progress-track"><div class="progress-fill" id="heroProgress" style="width:37%"></div></div>
+        </div>
+        <div class="hero-stat">
+          <div class="big" id="heroCoins">742</div>
+          <div class="lbl">coins earned</div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid-4" style="margin-bottom:24px">
+        <div class="card stat-card">
+          <div class="stat-label">Earned today</div>
+          <div class="stat-value" id="todayCoins">42</div>
+          <div class="stat-sub">coins</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-label">Coins to go</div>
+          <div class="stat-value" id="coinsToGo">1,253</div>
+          <div class="stat-sub">for this reward</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-label">Completed</div>
+          <div class="stat-value" id="todayPct">40%</div>
+          <div class="stat-sub">of today's habits</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-label">Current streak</div>
+          <div class="stat-value">14</div>
+          <div class="stat-sub">days in a row</div>
+        </div>
+      </div>
+
+      <!-- Habits -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">Habits</div>
+          <button class="btn-text" data-open-modal="habitModal">+ New habit</button>
+        </div>
+        <div class="habit-list" id="habitList"></div>
+      </div>
+    </section>
+
+    <!-- ── Rewards ── -->
+    <section class="screen" id="screen-rewards">
+      <div class="page-header">
+        <div>
+          <div class="page-sub">Progress you can feel</div>
+          <div class="page-title">Rewards</div>
+        </div>
+        <button class="btn btn-primary" data-open-modal="rewardModal">+ Add reward</button>
+      </div>
+
+      <!-- Primary reward detail -->
+      <div class="card" style="padding:20px;margin-bottom:24px">
+        <div style="display:grid;grid-template-columns:96px 1fr;gap:20px;align-items:center">
+          <div class="reward-thumb" id="rewardsThumb" style="width:96px;height:96px;background-image:url('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80')"></div>
+          <div>
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--faint);margin-bottom:4px">Primary</div>
+            <div style="font-size:20px;font-weight:740;letter-spacing:-0.01em;margin-bottom:4px" id="rewardsName">Sony WH-1000XM5</div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:12px" id="rewardsMeta">$399 · ~9 weeks to unlock</div>
+            <div class="progress-track" style="height:10px"><div class="progress-fill" id="rewardsProgress" style="width:37%"></div></div>
+            <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12.5px;color:var(--muted)">
+              <span><strong id="rewardsCoins" style="color:var(--text)">742</strong> / 1,995 coins</span>
+              <span id="rewardsPct">37% earned</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- All rewards grid -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">All rewards</div>
+        </div>
+        <div class="grid-3" id="rewardGrid"></div>
+      </div>
+
+      <!-- History -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">Earned history</div>
+          <button class="btn-text" id="unlockDemo">Preview unlock 🎉</button>
+        </div>
+        <div class="history-list">
+          <div class="history-item">
+            <div class="history-img" style="background-image:url('https://images.unsplash.com/photo-1512820790803-83ca734da794?w=200&q=80')"></div>
+            <div><div class="history-name">Kindle Scribe</div><div class="history-meta">Earned in 31 days · 1,700 coins</div></div>
+            <div class="history-date">Mar 2026</div>
+          </div>
+          <div class="history-item">
+            <div class="history-img" style="background-image:url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&q=80')"></div>
+            <div><div class="history-name">Running Shoes</div><div class="history-meta">Earned in 24 days · 645 coins</div></div>
+            <div class="history-date">Jan 2026</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Insights ── -->
+    <section class="screen" id="screen-insights">
+      <div class="page-header">
+        <div>
+          <div class="page-sub">Patterns &amp; progress</div>
+          <div class="page-title">Insights</div>
+        </div>
+      </div>
+
+      <div class="grid-4" style="margin-bottom:24px">
+        <div class="card stat-card"><div class="stat-label">This week</div><div class="stat-value">74%</div><div class="stat-sub">completion</div></div>
+        <div class="card stat-card"><div class="stat-label">Coins earned</div><div class="stat-value">620</div><div class="stat-sub">this week</div></div>
+        <div class="card stat-card"><div class="stat-label">Best habit</div><div class="stat-value">💧</div><div class="stat-sub">Water · 93%</div></div>
+        <div class="card stat-card"><div class="stat-label">Longest streak</div><div class="stat-value">56</div><div class="stat-sub">days · Gym</div></div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:16px">
+        <div class="card chart-card">
+          <div class="chart-title">Weekly completion trend</div>
+          <div class="line-chart-wrap">
+            <svg viewBox="0 0 400 140" width="100%" height="140" preserveAspectRatio="none">
+              <line x1="0" y1="30" x2="400" y2="30" stroke="var(--border)" class="lc-grid"/>
+              <line x1="0" y1="70" x2="400" y2="70" stroke="var(--border)" class="lc-grid"/>
+              <line x1="0" y1="110" x2="400" y2="110" stroke="var(--border)" class="lc-grid"/>
+              <path class="lc-fill" d="M0 105 L65 80 L130 88 L195 48 L260 58 L325 32 L400 42 L400 140 L0 140 Z"/>
+              <path class="lc-line" d="M0 105 L65 80 L130 88 L195 48 L260 58 L325 32 L400 42"/>
+            </svg>
+          </div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-title">Habit comparison this week</div>
+          <div class="bar-group">
+            <div class="bar-wrap"><div class="bar" style="height:93%"></div><div class="bar-lbl">💧</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:78%;opacity:0.75"></div><div class="bar-lbl">📖</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:66%;opacity:0.6"></div><div class="bar-lbl">🏋️</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:48%;opacity:0.45"></div><div class="bar-lbl">🧘</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:38%;opacity:0.3"></div><div class="bar-lbl">🌙</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-title">Consistency — last 28 days</div>
+        <div class="heatmap" id="heatmap"></div>
+      </div>
+    </section>
+
+    <!-- ── All Habits ── -->
+    <section class="screen" id="screen-habits">
+      <div class="page-header">
+        <div>
+          <div class="page-sub">7 active · 1 archived</div>
+          <div class="page-title">All Habits</div>
+        </div>
+        <button class="btn btn-primary" data-open-modal="habitModal">+ New habit</button>
+      </div>
+      <div class="habit-list" id="allHabitList"></div>
+    </section>
+
+    <!-- ── Tasks ── -->
+    <section class="screen" id="screen-tasks">
+      <div class="page-header">
+        <div>
+          <div class="page-sub">Flexible tracking</div>
+          <div class="page-title">Tasks</div>
+        </div>
+        <button class="btn btn-primary">+ New task</button>
+      </div>
+      <div class="grid-4" style="margin-bottom:24px">
+        <div class="card stat-card"><div class="stat-label">Today</div><div class="stat-value">40%</div><div class="stat-sub">done</div></div>
+        <div class="card stat-card"><div class="stat-label">Pending</div><div class="stat-value">7</div><div class="stat-sub">tasks</div></div>
+        <div class="card stat-card"><div class="stat-label">Postponed</div><div class="stat-value">1</div><div class="stat-sub">streak break</div></div>
+        <div class="card stat-card"><div class="stat-label">Monthly open</div><div class="stat-value">3</div><div class="stat-sub">no fixed date</div></div>
+      </div>
+      <div class="task-list">
+        <div class="task-item"><input type="checkbox" class="task-check" /><span class="task-name">Book annual health check</span><span class="chip chip-muted">Pending</span></div>
+        <div class="task-item"><input type="checkbox" class="task-check" /><span class="task-name">Deep clean apartment</span><span class="chip chip-muted">Monthly</span></div>
+        <div class="task-item"><input type="checkbox" class="task-check" checked /><span class="task-name done">Meditate 10 min</span><span class="chip chip-success">Done</span></div>
+        <div class="task-item"><input type="checkbox" class="task-check" /><span class="task-name">Cold plunge</span><span class="chip chip-gold">Postponed</span></div>
+      </div>
+    </section>
+
+    <!-- ── Projects ── -->
+    <section class="screen" id="screen-projects">
+      <div class="page-header">
+        <div>
+          <div class="page-sub">Multiple trackers, one topic</div>
+          <div class="page-title">Projects</div>
+        </div>
+        <button class="btn btn-primary">+ New project</button>
+      </div>
+      <div class="grid-2">
+        <div class="card project-card">
+          <div class="project-header">
+            <div class="project-icon">💪</div>
+            <div><div class="project-name">Health Reset</div><div class="project-meta">4 linked trackers · 62% this week</div></div>
+          </div>
+          <div class="sub-list">
+            <div class="sub-row"><strong>Workout</strong><span>3 / 4 sessions</span></div>
+            <div class="sub-row"><strong>Sleep</strong><span>6h 48m avg</span></div>
+            <div class="sub-row"><strong>Hydration</strong><span>42 / 56 glasses</span></div>
+            <div class="sub-row"><strong>Mobility</strong><span>2 / 5 days</span></div>
+          </div>
+        </div>
+        <div class="card project-card">
+          <div class="project-header">
+            <div class="project-icon">🗣️</div>
+            <div><div class="project-name">Language Learning</div><div class="project-meta">Daily + monthly prep</div></div>
+          </div>
+          <div class="sub-list">
+            <div class="sub-row"><strong>Vocabulary</strong><span>20 words/day</span></div>
+            <div class="sub-row"><strong>Speaking</strong><span>2 calls/week</span></div>
+            <div class="sub-row"><strong>Mock test</strong><span>1/month</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Fitness ── -->
+    <section class="screen" id="screen-fitness">
+      <div class="page-header">
+        <div><div class="page-sub">Workout detail</div><div class="page-title">Fitness</div></div>
+        <button class="btn btn-primary">+ Log workout</button>
+      </div>
+      <div class="fitness-grid">
+        <div class="card workout-card">
+          <div class="workout-title">Push Day</div>
+          <div class="workout-meta">Planned routine · linked to Gym habit</div>
+          <div class="exercise-list">
+            <div class="exercise-row"><strong>Bench press</strong><span>4 sets · 8 reps · 60 kg</span></div>
+            <div class="exercise-row"><strong>Shoulder press</strong><span>3 sets · 10 reps</span></div>
+            <div class="exercise-row"><strong>Triceps pushdown</strong><span>3 sets · 12 reps</span></div>
+          </div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-title">Weekly volume</div>
+          <div class="bar-group" style="height:100px">
+            <div class="bar-wrap"><div class="bar" style="height:38%"></div><div class="bar-lbl">M</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:52%"></div><div class="bar-lbl">T</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:44%"></div><div class="bar-lbl">W</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:68%"></div><div class="bar-lbl">T</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:82%"></div><div class="bar-lbl">F</div></div>
+          </div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-title">Body metrics</div>
+          <div style="display:grid;gap:8px;margin-top:4px">
+            <div class="sub-row"><strong>Weight</strong><span>68.4 kg</span></div>
+            <div class="sub-row"><strong>Body fat</strong><span>14.8%</span></div>
+            <div class="sub-row"><strong>Waist</strong><span>72 cm</span></div>
+          </div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-title">Social</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.5">Follow friends, share routines, comment on workouts. Apple Watch and Strava support coming.</div>
+          <button class="btn btn-ghost btn-full">View community feed</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Sleep ── -->
+    <section class="screen" id="screen-sleep">
+      <div class="page-header">
+        <div><div class="page-sub">Sleep analysis</div><div class="page-title">Sleep</div></div>
+      </div>
+      <div class="sleep-grid">
+        <div class="card sleep-score">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--faint);margin-bottom:8px">Sleep score</div>
+          <div class="sleep-score-num">82</div>
+          <div class="sleep-score-lbl">7h 12m · 91% efficiency</div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-title">Sleep stages</div>
+          <div class="stage-bar" style="margin-bottom:10px">
+            <span class="stage-rem" style="width:22%">REM</span>
+            <span class="stage-deep" style="width:18%">Deep</span>
+            <span class="stage-light" style="width:52%">Light</span>
+            <span class="stage-awake" style="width:8%">Awake</span>
+          </div>
+          <div style="font-size:12px;color:var(--muted)">38 min sleep debt</div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-title">Suggestions</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:10px">Wind down at 10:15 PM. Dim lights, avoid late caffeine, protect a consistent wake time.</div>
+          <div style="font-size:11px;color:var(--faint);line-height:1.4">Suggestions are informational. Consult a clinician for medical concerns.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Pricing ── -->
+    <section class="screen" id="screen-pricing">
+      <div class="page-header">
+        <div><div class="page-sub">Free vs Plus</div><div class="page-title">Plans</div></div>
+      </div>
+      <div class="pricing-grid">
+        <div class="card price-card">
+          <div class="price-tier">Free</div>
+          <div class="price-amount">$0</div>
+          <div class="price-desc">For proving the habit-to-reward loop.</div>
+          <ul class="price-list">
+            <li>5 active habits</li>
+            <li>1 active reward</li>
+            <li>Basic reminders</li>
+            <li>30-day history</li>
+            <li>Basic charts</li>
+          </ul>
+        </div>
+        <div class="card price-card featured">
+          <div class="price-tier">Plus</div>
+          <div class="price-amount">$5.99 <span style="font-size:16px;font-weight:400">/mo</span></div>
+          <div class="price-desc">Serious tracking across habits, health, and rewards.</div>
+          <ul class="price-list">
+            <li>Unlimited habits, tasks, projects &amp; rewards</li>
+            <li>Advanced analytics &amp; streak rules</li>
+            <li>Workout, sleep &amp; body metrics</li>
+            <li>Calendar, health &amp; wearable integrations</li>
+            <li>Widgets for phone and desktop</li>
+            <li>CSV / JSON export</li>
+          </ul>
+          <button class="btn btn-gold btn-full" style="margin-top:16px">Get Plus →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Integrations ── -->
+    <section class="screen" id="screen-integrations">
+      <div class="page-header">
+        <div><div class="page-sub">Connected life</div><div class="page-title">Integrations</div></div>
+      </div>
+      <div class="integration-grid">
+        <div class="card integration-card"><div class="integration-icon">❤️</div><div class="integration-name">Health apps</div><div class="integration-desc">Apple Health, Google Fit, Garmin, Oura, Whoop</div></div>
+        <div class="card integration-card"><div class="integration-icon">📅</div><div class="integration-name">Calendar</div><div class="integration-desc">Find open time, show next event, schedule habit blocks</div></div>
+        <div class="card integration-card"><div class="integration-icon">🏠</div><div class="integration-name">Smart home</div><div class="integration-desc">Dim lights for wind down, start focus scenes</div></div>
+        <div class="card integration-card"><div class="integration-icon">👥</div><div class="integration-name">Social</div><div class="integration-desc">Share progress, invite accountability friends</div></div>
+        <div class="card integration-card"><div class="integration-icon">📱</div><div class="integration-name">Widgets</div><div class="integration-desc">Phone and desktop widgets for habits and rewards</div></div>
+        <div class="card integration-card"><div class="integration-icon">💱</div><div class="integration-name">Currency</div><div class="integration-desc">USD, THB, EUR, GBP and more → locked coin targets</div></div>
+        <div class="card integration-card"><div class="integration-icon">⌚</div><div class="integration-name">Wearables</div><div class="integration-desc">Auto-log workouts from Apple Watch, Garmin, Oura</div></div>
+        <div class="card integration-card"><div class="integration-icon">🔔</div><div class="integration-name">Notifications</div><div class="integration-desc">Smart reminders that respect your quiet hours</div></div>
+      </div>
+    </section>
+
+    <!-- ── Feedback ── -->
+    <section class="screen" id="screen-feedback">
+      <div class="page-header">
+        <div><div class="page-sub">Share thoughts</div><div class="page-title">Feedback</div></div>
+      </div>
+      <div class="feedback-layout">
+        <div class="card feedback-box">
+          <textarea id="commentInput" placeholder="Leave feedback on this prototype..."></textarea>
+          <button class="btn btn-primary" id="addComment">Add comment</button>
+        </div>
+        <div class="comment-list" id="commentList"></div>
+      </div>
+    </section>
+
+    <!-- ── Settings ── -->
+    <section class="screen" id="screen-settings">
+      <div class="page-header">
+        <div><div class="page-sub">Personalize</div><div class="page-title">Settings</div></div>
+      </div>
+      <div class="settings-grid">
+        <div class="card settings-card">
+          <div class="settings-card-title">Appearance</div>
+          <div class="theme-seg">
+            <button data-set-theme="light">Light</button>
+            <button data-set-theme="dark">Dark</button>
+            <button data-set-theme="system">System</button>
+          </div>
+          <div class="switch-row"><span>Reduce motion</span><input type="checkbox" /></div>
+          <div class="switch-row"><span>High contrast charts</span><input type="checkbox" /></div>
+        </div>
+        <div class="card settings-card">
+          <div class="settings-card-title">Notifications</div>
+          <div class="switch-row"><span>Habit reminders</span><input type="checkbox" checked /></div>
+          <div class="switch-row"><span>Missed-habit warning</span><input type="checkbox" checked /></div>
+          <div class="switch-row"><span>Weekly recap</span><input type="checkbox" /></div>
+          <div class="switch-row"><span>Quiet hours</span><input type="checkbox" checked /></div>
+        </div>
+        <div class="card settings-card">
+          <div class="settings-card-title">Rewards</div>
+          <div class="form-field">
+            <label class="form-label">Default currency</label>
+            <select class="form-input">
+              <option>USD</option><option>THB</option><option>EUR</option><option>GBP</option>
+            </select>
+          </div>
+          <div class="switch-row"><span>Hide prices on home</span><input type="checkbox" /></div>
+        </div>
+        <div class="card settings-card">
+          <div class="settings-card-title">Privacy</div>
+          <div class="switch-row"><span>App lock</span><input type="checkbox" /></div>
+          <div class="switch-row"><span>Analytics opt-out</span><input type="checkbox" /></div>
+        </div>
+        <div class="card settings-card">
+          <div class="settings-card-title">Data</div>
+          <button class="btn btn-ghost btn-full" id="exportCsv" style="margin-bottom:8px">Export CSV</button>
+          <button class="btn btn-ghost btn-full" id="exportJson" style="margin-bottom:8px">Export JSON</button>
+          <label class="btn btn-ghost btn-full" style="cursor:pointer;display:flex;align-items:center;justify-content:center">
+            Import JSON <input type="file" id="importJson" accept="application/json" hidden />
+          </label>
+          <button class="btn btn-ghost btn-full" data-install-guide style="margin-top:8px">Install app</button>
+          <button class="btn-danger btn-full" id="resetData" style="margin-top:8px">Reset local data</button>
+        </div>
+        <div class="card settings-card price-card featured">
+          <div class="settings-card-title">Momentum Plus</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5">Unlimited rewards, advanced charts, calendar sync, widgets, and exports.</div>
+          <button class="btn btn-gold btn-full">Preview subscription</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ── Mobile tabbar ── -->
+<nav class="tabbar">
+  <button class="tab-btn active" data-screen="today">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    Today
+  </button>
+  <button class="tab-btn" data-screen="habits">
+    <svg viewBox="0 0 24 24"><path d="m9 11 2 2 4-4M9 18h8M5 6h.01M5 12h.01M5 18h.01"/></svg>
+    Habits
+  </button>
+  <button class="tab-btn" data-screen="rewards">
+    <svg viewBox="0 0 24 24"><path d="M20 12v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8M2 7h20v5H2zM12 22V7"/></svg>
+    Rewards
+  </button>
+  <button class="tab-btn" data-screen="insights">
+    <svg viewBox="0 0 24 24"><path d="M3 3v18h18M7 16l4-8 4 6 3-4"/></svg>
+    Insights
+  </button>
+  <button class="tab-btn" data-screen="settings">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.22.6.78 1 1.42 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Settings
+  </button>
+</nav>
+
+<!-- ── Add Habit Modal ── -->
+<dialog id="habitModal">
+  <form class="modal-card" id="habitForm" method="dialog">
+    <div class="modal-header">
+      <div class="modal-title" id="habitModalTitle">New habit</div>
+      <button type="button" class="btn-icon" data-close-dialog>
+        <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <input type="hidden" id="habitEditId" />
+    <div class="form-field">
+      <label class="form-label">Habit name</label>
+      <input class="form-input" id="habitName" type="text" placeholder="e.g. Walk after lunch" value="Walk after lunch" />
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 120px;gap:12px">
+      <div class="form-field">
+        <label class="form-label">Frequency</label>
+        <select class="form-input" id="habitFreq">
+          <option>Daily</option><option>Weekly</option><option>Monthly</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Target</label>
+        <input class="form-input" id="habitTarget" type="number" min="1" max="20" value="1" />
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Difficulty &amp; coins</label>
+      <div class="difficulty-grid">
+        <button type="button" class="diff-btn" data-diff="10">Easy<small>+10 coins</small></button>
+        <button type="button" class="diff-btn sel" data-diff="25">Medium<small>+25 coins</small></button>
+        <button type="button" class="diff-btn" data-diff="50">Hard<small>+50 coins</small></button>
+        <button type="button" class="diff-btn" data-diff="100">Very hard<small>+100 coins</small></button>
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Emoji icon</label>
+      <input class="form-input" id="habitEmoji" type="text" placeholder="e.g. 🏋️" value="⭐" maxlength="4" />
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-bottom:8px" value="default">Save habit</button>
+    <button type="button" class="btn btn-danger btn-full" id="deleteHabit" hidden>Delete habit</button>
+  </form>
+</dialog>
+
+<!-- ── Add Reward Modal ── -->
+<dialog id="rewardModal">
+  <form class="modal-card" id="rewardForm" method="dialog">
+    <div class="modal-header">
+      <div class="modal-title" id="rewardModalTitle">New reward</div>
+      <button type="button" class="btn-icon" data-close-dialog>
+        <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <input type="hidden" id="rewardEditId" />
+    <div class="form-field">
+      <label class="form-label">Reward name</label>
+      <input class="form-input" id="rewardName" type="text" placeholder="e.g. New running shoes" value="New running shoes" />
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 120px;gap:12px">
+      <div class="form-field">
+        <label class="form-label">Price</label>
+        <input class="form-input" id="rewardPrice" type="number" min="1" value="150" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">Currency</label>
+        <select class="form-input" id="rewardCurrency"><option>USD</option><option>THB</option><option>EUR</option></select>
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Emoji icon</label>
+      <input class="form-input" id="rewardEmoji" type="text" placeholder="e.g. 🎧" value="🎁" maxlength="4" />
+    </div>
+    <div class="conversion-box">
+      <div class="conversion-val" id="conversionVal">$150 = 750 coins</div>
+      <div class="conversion-note">1 USD = 5 coins · no money is stored in Momentum</div>
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-bottom:8px" value="default">Start earning →</button>
+    <button type="button" class="btn btn-danger btn-full" id="deleteReward" hidden>Delete reward</button>
+  </form>
+</dialog>
+
+<!-- ── Celebration Modal ── -->
+<dialog id="celebrationModal">
+  <form class="modal-card celebration-card" method="dialog">
+    <div class="celebration-emoji">🎉</div>
+    <div class="celebration-title">You earned it!</div>
+    <div class="celebration-sub" id="celebrationSub">You've unlocked Sony WH-1000XM5 through consistent daily habits.</div>
+    <div class="celebration-stats">
+      <div class="celebration-stat"><div class="celebration-stat-val" id="celebCoins">1,995</div><div class="celebration-stat-lbl">coins</div></div>
+      <div class="celebration-stat"><div class="celebration-stat-val">86</div><div class="celebration-stat-lbl">actions</div></div>
+      <div class="celebration-stat"><div class="celebration-stat-val">24</div><div class="celebration-stat-lbl">days</div></div>
+    </div>
+    <button class="btn btn-gold btn-full" style="margin-bottom:8px" value="default">I bought it 🛍️</button>
+    <button class="btn btn-ghost btn-full" value="cancel">Choose next reward</button>
+  </form>
+</dialog>
+
+<!-- ── Install Guide Modal ── -->
+<dialog id="installGuideModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title" id="installGuideTitle">Install Momentum</div>
+      <button type="button" class="btn-icon" data-close-dialog>
+        <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <p class="install-guide-intro">Add Momentum to your home screen or app launcher — works offline, launches instantly, and feels like a native app.</p>
+    <div id="installGuideSteps" class="install-guide-steps"></div>
+    <p id="installGuideNote" class="install-guide-note" hidden></p>
+    <button class="btn btn-primary btn-full" id="installGuideNativeBtn" style="margin-bottom:8px" hidden>
+      <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><path d="M12 16l-4-4h3V4h2v8h3l-4 4Z"/><path d="M20 18H4"/></svg>
+      Install app now
+    </button>
+    <button type="button" class="btn btn-ghost btn-full" data-close-dialog>Close</button>
+  </div>
+</dialog>
+
+<script src="script.js"></script>
+<script>
+  if ("serviceWorker" in navigator && location.protocol !== "file:") {
+    navigator.serviceWorker.register("./sw.js");
+  }
+</script>
+</body>
+</html>

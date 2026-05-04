@@ -1,0 +1,38 @@
+{
+  "id": "/momentum/",
+  "name": "Momentum",
+  "short_name": "Momentum",
+  "description": "Build habits. Earn coins. Unlock your wishlist.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#0d0d0f",
+  "theme_color": "#5b6af5",
+  "orientation": "any",
+  "categories": ["health", "lifestyle", "productivity"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Today",
+      "short_name": "Today",
+      "description": "View today's habits",
+      "url": "./?screen=today",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Rewards",
+      "short_name": "Rewards",
+      "description": "View your rewards",
+      "url": "./?screen=rewards",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
