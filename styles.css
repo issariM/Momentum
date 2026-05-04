@@ -139,6 +139,87 @@ img { display: block; max-width: 100%; }
   border-top: 1px solid var(--border);
 }
 
+/* ── Sidebar hide (pre-auth screens) ── */
+.shell.hide-sidebar { grid-template-columns: 1fr; }
+.shell.hide-sidebar .sidebar { display: none; }
+
+/* ── Pre-auth screens (install / signin) ── */
+.preauth-screen { padding: 0; max-width: none; }
+.preauth-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+.preauth-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.preauth-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--accent);
+  display: grid;
+  place-items: center;
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+.preauth-logo svg { width: 28px; height: 28px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.preauth-title { font-size: 24px; font-weight: 760; letter-spacing: -0.02em; text-align: center; margin-bottom: 8px; }
+.preauth-sub { font-size: 14px; color: var(--muted); text-align: center; line-height: 1.5; margin-bottom: 32px; }
+.install-options { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.install-platform-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.install-platform-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.preauth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 24px 0 16px;
+  color: var(--faint);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.preauth-divider::before, .preauth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.preauth-skip {
+  font-size: 12px;
+  color: var(--faint);
+  cursor: pointer;
+  background: none;
+  border: none;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  margin-top: 12px;
+}
+.preauth-skip:hover { color: var(--muted); }
+
 /* ── Main ── */
 .main {
   display: flex;

@@ -1,5 +1,10 @@
 const STORAGE_KEY = "momentum-v1";
 const STARTED_KEY = "momentum-started-v1";
+const AUTH_KEY = "momentum-auth-v1";
+
+function isInstalledPWA() {
+  return window.matchMedia("(display-mode: standalone)").matches || !!navigator.standalone;
+}
 
 // Exchange rates: how many units of each currency = 1 USD
 // 1 USD = 5 coins, so coins = price / rate * 5
@@ -63,9 +68,10 @@ function save() {
 function reset() {
   state = structuredClone(defaultState);
   localStorage.removeItem(STARTED_KEY);
+  localStorage.removeItem(AUTH_KEY);
   save();
   renderAll();
-  switchScreen("onboarding");
+  switchScreen(isInstalledPWA() ? "signin" : "install");
 }
 
 // ── Theme ──
@@ -96,9 +102,11 @@ function cycleTheme() {
 }
 
 // ── Screen routing ──
+const PREAUTH_SCREENS = new Set(["install", "signin"]);
 function switchScreen(name) {
   document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === `screen-${name}`));
   document.querySelectorAll("[data-screen]").forEach(b => b.classList.toggle("active", b.dataset.screen === name));
+  document.querySelector(".shell").classList.toggle("hide-sidebar", PREAUTH_SCREENS.has(name));
 }
 
 // ── Date ──
@@ -472,8 +480,7 @@ const STARTER_TEMPLATES = {
 
 // ── Start app ──
 function startApp() {
-  const nameEl = document.querySelector("#onboardName");
-  if (nameEl?.value.trim()) state.profile.name = nameEl.value.trim();
+  // Name captured at sign-in; nothing to read here
 
   // Build habits from selected starters
   const selected = document.querySelectorAll(".starter-btn.sel");
@@ -819,6 +826,22 @@ function renderAll() {
   renderSleep();
 }
 
+// ── Sign in ──
+function doSignin() {
+  const name = document.querySelector("#signinName")?.value.trim();
+  if (!name) {
+    document.querySelector("#signinName")?.focus();
+    return;
+  }
+  state.profile.name = name;
+  localStorage.setItem(AUTH_KEY, "1");
+  save();
+  // Show name on activate screen
+  const nameEl = document.querySelector("#activateName");
+  if (nameEl) nameEl.textContent = name;
+  switchScreen("onboarding");
+}
+
 // ── Events ──
 function bindEvents() {
   document.addEventListener("click", e => {
@@ -826,8 +849,21 @@ function bindEvents() {
     const screenBtn = e.target.closest("[data-screen]");
     if (screenBtn) { switchScreen(screenBtn.dataset.screen); return; }
 
-    // Start
+    // Start (activate screen)
     if (e.target.closest("[data-start]")) { startApp(); return; }
+
+    // Install screen: native prompt
+    if (e.target.closest("#installScreenNativeBtn")) { requestInstall(); return; }
+
+    // Install screen: already installed / open
+    if (e.target.closest("#installDoneBtn") || e.target.closest("#installSkipBtn")) {
+      switchScreen("signin");
+      setTimeout(() => document.querySelector("#signinName")?.focus(), 50);
+      return;
+    }
+
+    // Sign in
+    if (e.target.closest("#signinBtn")) { doSignin(); return; }
 
     // Install guide modal
     if (e.target.closest("[data-install-guide]")) { showInstallModal(); return; }
@@ -1052,17 +1088,26 @@ function bindEvents() {
     if (confirm("Reset all data on this device?")) reset();
   });
 
+  // Sign in: Enter key
+  document.querySelector("#signinName")?.addEventListener("keydown", e => {
+    if (e.key === "Enter") doSignin();
+  });
+
   // PWA install (Chrome/Edge fires this when app is installable)
   window.addEventListener("beforeinstallprompt", e => {
     e.preventDefault();
     deferredInstall = e;
-    document.querySelector("#installBtn").hidden = false;
+    document.querySelectorAll("#installBtn, #installScreenNativeBtn").forEach(el => { if (el) el.hidden = false; });
   });
 
-  // Hide install UI once installed
+  // After install: advance from install screen to signin
   window.addEventListener("appinstalled", () => {
     deferredInstall = null;
     document.querySelectorAll("#headerInstallBtn, #installBtn, .install-banner").forEach(el => { if (el) el.hidden = true; });
+    if (document.querySelector("#screen-install.active")) {
+      switchScreen("signin");
+      setTimeout(() => document.querySelector("#signinName")?.focus(), 50);
+    }
   });
 
   // System theme
@@ -1110,10 +1155,28 @@ const settingsCurrEl = document.querySelector("#settingsCurrency");
 if (settingsCurrEl) settingsCurrEl.value = state.currency || "USD";
 
 const urlScreen = new URLSearchParams(location.search).get("screen");
-const started = localStorage.getItem(STARTED_KEY) === "1";
-switchScreen(started ? (urlScreen || "today") : "onboarding");
+const _started   = localStorage.getItem(STARTED_KEY) === "1";
+const _signedIn  = localStorage.getItem(AUTH_KEY) === "1";
+const _pwa       = isInstalledPWA();
+
+if (_started) {
+  // Returning user — show activate name if somehow revisiting onboarding
+  const nameEl = document.querySelector("#activateName");
+  if (nameEl && state.profile.name) nameEl.textContent = state.profile.name;
+  switchScreen(urlScreen || "today");
+} else if (!_pwa && !_signedIn) {
+  switchScreen("install");
+} else if (!_signedIn) {
+  switchScreen("signin");
+  setTimeout(() => document.querySelector("#signinName")?.focus(), 50);
+} else {
+  // Signed in but not activated (e.g. refresh mid-onboarding)
+  const nameEl = document.querySelector("#activateName");
+  if (nameEl && state.profile.name) nameEl.textContent = state.profile.name;
+  switchScreen("onboarding");
+}
 
 // Hide install UI if already running as installed app
-if (window.matchMedia("(display-mode: standalone)").matches || navigator.standalone) {
+if (_pwa) {
   document.querySelectorAll("#headerInstallBtn, #installBtn, .install-banner").forEach(el => { if (el) el.hidden = true; });
 }
