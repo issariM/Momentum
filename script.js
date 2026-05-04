@@ -1,28 +1,29 @@
 const STORAGE_KEY = "momentum-v1";
 const STARTED_KEY = "momentum-started-v1";
 
+// Exchange rates: how many units of each currency = 1 USD
+// 1 USD = 5 coins, so coins = price / rate * 5
+const FX = {
+  USD: { rate: 1,    symbol: "$",  name: "US Dollar"        },
+  THB: { rate: 33,   symbol: "฿",  name: "Thai Baht"        },
+  EUR: { rate: 0.93, symbol: "€",  name: "Euro"             },
+  GBP: { rate: 0.79, symbol: "£",  name: "British Pound"    },
+  JPY: { rate: 149,  symbol: "¥",  name: "Japanese Yen"     },
+  SGD: { rate: 1.35, symbol: "S$", name: "Singapore Dollar" },
+  AUD: { rate: 1.55, symbol: "A$", name: "Australian Dollar"},
+  CNY: { rate: 7.25, symbol: "¥",  name: "Chinese Yuan"     },
+};
+
 const defaultState = {
-  primaryRewardId: "sony",
-  todayCoins: 42,
+  primaryRewardId: null,
+  currency: "USD",
+  todayCoins: 0,
   unlocked: false,
   profile: { name: "" },
-  comments: [
-    { author: "Founder note", text: "Coins should feel like a real progression system, not a gamification gimmick." },
-    { author: "Design note", text: "Keep dark mode high-contrast — especially for the progress bars and habit states." }
-  ],
-  rewards: [
-    { id: "sony", name: "Sony WH-1000XM5", emoji: "🎧", price: 399, currency: "USD", current: 742, target: 1995, eta: "~9 wks", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80" },
-    { id: "trip", name: "Weekend in Chiang Mai", emoji: "✈️", price: 680, currency: "USD", current: 0, target: 3400, eta: "~24 wks", img: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=400&q=80" },
-    { id: "kindle", name: "Kindle Scribe", emoji: "📖", price: 340, currency: "USD", current: 0, target: 1700, eta: "Later", img: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&q=80" },
-    { id: "camera", name: "New Camera", emoji: "📷", price: 700, currency: "USD", current: 560, target: 7000, eta: "Later", img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80" }
-  ],
-  habits: [
-    { id: "gym", name: "Gym", emoji: "🏋️", target: 1, count: 0, coins: 25, streak: "56 days", difficulty: "Hard" },
-    { id: "read", name: "Read", emoji: "📖", target: 1, count: 0, coins: 15, streak: "5 days", difficulty: "Medium" },
-    { id: "water", name: "Drink water", emoji: "💧", target: 8, count: 6, coins: 5, streak: "12 days", difficulty: "Easy" },
-    { id: "clean", name: "No phone in bed", emoji: "🌙", target: 1, count: 0, coins: 15, streak: "Check at 10 PM", difficulty: "Medium" },
-    { id: "meditate", name: "Meditate", emoji: "🧘", target: 1, count: 1, coins: 12, streak: "20 days", difficulty: "Medium" }
-  ]
+  comments: [],
+  rewards: [],
+  habits: [],
+  sleep: []
 };
 
 let state = structuredClone(defaultState);
@@ -30,6 +31,16 @@ let deferredInstall = null;
 
 function primaryReward() {
   return state.rewards.find(r => r.id === state.primaryRewardId) || state.rewards[0];
+}
+
+function coinsFromPrice(price, currency) {
+  const rate = FX[currency]?.rate ?? 1;
+  return Math.max(1, Math.round(price / rate * 5));
+}
+
+function fmtPrice(price, currency) {
+  const sym = FX[currency]?.symbol ?? "$";
+  return sym + price.toLocaleString();
 }
 
 function load() {
@@ -40,6 +51,7 @@ function load() {
       state.habits ||= [];
       state.rewards ||= [];
       state.comments ||= [];
+      state.sleep ||= [];
     }
   } catch { localStorage.removeItem(STORAGE_KEY); }
 }
@@ -149,7 +161,7 @@ function renderRewards() {
     card.innerHTML = `
       <div class="reward-card-img" style="background-image:url('${r.img}')">${r.img ? "" : r.emoji}</div>
       <div class="reward-card-name">${esc(r.name)}</div>
-      <div class="reward-card-meta">$${r.price.toLocaleString()} · ${isPrimary ? "Primary" : r.eta}</div>
+      <div class="reward-card-meta">${fmtPrice(r.price, r.currency)} · ${isPrimary ? "Primary" : r.eta}</div>
       <div class="mini-progress"><div class="mini-progress-fill" style="width:${pct}%"></div></div>
       <div class="reward-card-footer">
         <span style="font-size:12px;color:var(--muted)">${r.current.toLocaleString()} / ${r.target.toLocaleString()} · ${pct}%</span>
@@ -172,12 +184,12 @@ function updateRewardUI() {
   const setStyle = (id, prop, val) => { const el = document.querySelector(id); if (el) el.style[prop] = val; };
 
   set("#heroName", r.name);
-  set("#heroMeta", `$${r.price.toLocaleString()} · ${r.current.toLocaleString()} / ${r.target.toLocaleString()} coins`);
+  set("#heroMeta", `${fmtPrice(r.price, r.currency)} · ${r.current.toLocaleString()} / ${r.target.toLocaleString()} coins`);
   set("#heroCoins", r.current.toLocaleString());
   set("#coinsToGo", remaining.toLocaleString());
   set("#todayCoins", state.todayCoins);
   set("#rewardsName", r.name);
-  set("#rewardsMeta", `$${r.price.toLocaleString()} · estimated unlock in ${r.eta}`);
+  set("#rewardsMeta", `${fmtPrice(r.price, r.currency)} · estimated unlock in ${r.eta}`);
   set("#rewardsCoins", r.current.toLocaleString());
   set("#rewardsPct", `${pct}% earned`);
 
@@ -262,7 +274,7 @@ function openRewardForm(id = "") {
   document.querySelector("#rewardEditId").value = id;
   document.querySelector("#rewardName").value = r?.name || "New running shoes";
   document.querySelector("#rewardPrice").value = r?.price || 150;
-  document.querySelector("#rewardCurrency").value = r?.currency || "USD";
+  document.querySelector("#rewardCurrency").value = r?.currency || state.currency || "USD";
   document.querySelector("#rewardEmoji").value = r?.emoji || "🎁";
   document.querySelector("#deleteReward").hidden = !r;
   updateConversion();
@@ -271,8 +283,10 @@ function openRewardForm(id = "") {
 
 function updateConversion() {
   const price = Math.max(0, Number(document.querySelector("#rewardPrice")?.value) || 0);
+  const currency = document.querySelector("#rewardCurrency")?.value || state.currency || "USD";
+  const coins = coinsFromPrice(price, currency);
   const el = document.querySelector("#conversionVal");
-  if (el) el.textContent = `$${price.toLocaleString()} = ${(price * 5).toLocaleString()} coins`;
+  if (el) el.textContent = `${fmtPrice(price, currency)} = ${coins.toLocaleString()} coins`;
 }
 
 // ── Comments ──
@@ -448,13 +462,352 @@ function showInstallModal() {
   document.querySelector("#installGuideModal")?.showModal();
 }
 
+// ── Starter habit templates ──
+const STARTER_TEMPLATES = {
+  "Drink water": { id: "water",    emoji: "💧", target: 8, coins: 5,  difficulty: "Easy"   },
+  "Workout":     { id: "workout",  emoji: "🏋️", target: 1, coins: 25, difficulty: "Hard"   },
+  "Read":        { id: "read",     emoji: "📖", target: 1, coins: 15, difficulty: "Medium" },
+  "Meditate":    { id: "meditate", emoji: "🧘", target: 1, coins: 12, difficulty: "Medium" },
+};
+
 // ── Start app ──
 function startApp() {
   const nameEl = document.querySelector("#onboardName");
   if (nameEl?.value.trim()) state.profile.name = nameEl.value.trim();
+
+  // Build habits from selected starters
+  const selected = document.querySelectorAll(".starter-btn.sel");
+  if (selected.length > 0) {
+    state.habits = [];
+    selected.forEach(btn => {
+      const name = btn.querySelector(".starter-name")?.textContent?.trim();
+      const tmpl = STARTER_TEMPLATES[name];
+      if (tmpl) state.habits.push({ ...tmpl, name, count: 0, streak: "New today" });
+    });
+  }
+
+  // Build reward from onboarding form
+  const rName = document.querySelector("#onboardRewardName")?.value.trim();
+  const rPrice = parseFloat(document.querySelector("#onboardRewardPrice")?.value) || 0;
+  const rCurrency = document.querySelector("#onboardRewardCurrency")?.value || "USD";
+  state.currency = rCurrency;
+  if (rName && rPrice > 0) {
+    const reward = { id: "r1", name: rName, emoji: "🎯", price: rPrice, currency: rCurrency, current: 0, target: coinsFromPrice(rPrice, rCurrency), eta: "Set by you", img: "" };
+    state.rewards = [reward];
+    state.primaryRewardId = "r1";
+  }
+
   localStorage.setItem(STARTED_KEY, "1");
   save();
   switchScreen("today");
+}
+
+function updateStarterCount() {
+  const count = document.querySelectorAll(".starter-btn.sel").length;
+  const btn = document.querySelector("[data-starter-continue]");
+  if (btn) btn.textContent = `Continue · ${count} selected`;
+}
+
+// ════════════════════════════════════════
+// SLEEP ANALYSIS
+// ════════════════════════════════════════
+const SLEEP_TARGET_MIN = 420; // 7 hours
+let currentSleepZoom = "day";
+
+function sleepRecs() {
+  return (state.sleep || []).slice().sort((a, b) => b.wake_date.localeCompare(a.wake_date));
+}
+
+function parseDT(s) { return s ? new Date(s) : null; }
+
+function calcSleepFields(bedtime, wakeTime, latency = 0) {
+  const b = parseDT(bedtime), w = parseDT(wakeTime);
+  if (!b || !w || w <= b) return null;
+  const tib = Math.round((w - b) / 60000);
+  const tst = Math.max(0, tib - (latency || 0));
+  return { time_in_bed_min: tib, total_sleep_min: tst, sleep_efficiency_pct: tib > 0 ? Math.round(tst / tib * 100) : 0 };
+}
+
+function flagSleepRecord(r) {
+  const f = [];
+  if (r.total_sleep_min < 180 || r.total_sleep_min > 720) f.push("outlier");
+  if (r.sleep_efficiency_pct < 50 || r.sleep_efficiency_pct > 99) f.push("outlier");
+  return f;
+}
+
+function fmtDur(min) {
+  if (min == null || isNaN(min)) return "—";
+  return `${Math.floor(min / 60)}h ${String(Math.round(min % 60)).padStart(2, "0")}m`;
+}
+
+function fmtBedtime(dt) {
+  const d = parseDT(dt);
+  return d ? d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "—";
+}
+
+function meanOf(arr) { return arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : null; }
+function medianOf(arr) {
+  if (!arr.length) return null;
+  const s = [...arr].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+function sdOf(arr) {
+  if (arr.length < 2) return 0;
+  const m = meanOf(arr);
+  return Math.sqrt(arr.reduce((s, v) => s + (v - m) ** 2, 0) / arr.length);
+}
+
+function bedtimeMins(bedtime) {
+  const d = parseDT(bedtime);
+  if (!d) return null;
+  let m = d.getHours() * 60 + d.getMinutes();
+  if (m < 720) m += 1440; // treat early-morning (1am) as 25h for variability calc
+  return m;
+}
+
+function isoWeek(d) {
+  const dt = new Date(+d);
+  dt.setHours(0, 0, 0, 0);
+  dt.setDate(dt.getDate() + 3 - (dt.getDay() + 6) % 7);
+  const w1 = new Date(dt.getFullYear(), 0, 4);
+  const wn = 1 + Math.round(((dt - w1) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7);
+  return `${dt.getFullYear()}-W${String(wn).padStart(2, "0")}`;
+}
+
+function validSleepRecs(recs) {
+  return recs.filter(r => !r.flags?.includes("outlier") && r.total_sleep_min > 0);
+}
+
+function sleepStats(recs) {
+  const valid = validSleepRecs(recs);
+  if (!valid.length) return { n: recs.length, nValid: 0, avgSleep: null, avgEff: null, bedVariability: null, socialJetLag: null, pctGoodSleep: 0, avgRating: null, medianLatency: null };
+  const bedMins = valid.map(r => bedtimeMins(r.bedtime)).filter(Boolean);
+  const isWeekday = r => { const wd = new Date(r.wake_date + "T12:00").getDay(); return wd >= 1 && wd <= 5; };
+  const wdBed = valid.filter(r => isWeekday(r)).map(r => bedtimeMins(r.bedtime)).filter(Boolean);
+  const weBed = valid.filter(r => !isWeekday(r)).map(r => bedtimeMins(r.bedtime)).filter(Boolean);
+  return {
+    n: recs.length,
+    nValid: valid.length,
+    avgSleep: meanOf(valid.map(r => r.total_sleep_min)),
+    avgEff: meanOf(valid.map(r => r.sleep_efficiency_pct)),
+    bedVariability: Math.round(sdOf(bedMins)),
+    socialJetLag: wdBed.length && weBed.length ? Math.round(Math.abs(meanOf(weBed) - meanOf(wdBed))) : null,
+    pctGoodSleep: Math.round(valid.filter(r => r.total_sleep_min >= SLEEP_TARGET_MIN).length / valid.length * 100),
+    avgRating: meanOf(valid.map(r => r.subjective_rating).filter(Boolean)),
+    medianLatency: medianOf(valid.map(r => r.sleep_latency_min).filter(v => v != null))
+  };
+}
+
+// ── Insights engine (from PDF Section 7) ──
+function getSleepInsights() {
+  const recs = sleepRecs();
+  if (recs.length < 2) return [];
+  const insights = [];
+  const recent = recs.slice(0, 14);
+  const s = sleepStats(recent);
+  if (s.bedVariability > 45)
+    insights.push({ type: "warn", text: `Bedtime varies ±${s.bedVariability} min this fortnight — consistency is the #1 evidence-based predictor of sleep quality (stronger than duration).` });
+  else if (s.bedVariability <= 20 && s.n >= 5)
+    insights.push({ type: "good", text: `Strong bedtime consistency (±${s.bedVariability} min). Research confirms this predicts sleep quality better than duration.` });
+  if (s.avgSleep && s.avgSleep < SLEEP_TARGET_MIN - 30)
+    insights.push({ type: "warn", text: `Averaging ${fmtDur(Math.round(s.avgSleep))} — ${fmtDur(Math.round(SLEEP_TARGET_MIN - s.avgSleep))} below the 7h target.` });
+  if (s.socialJetLag > 60)
+    insights.push({ type: "warn", text: `Social jet lag: bedtime shifts ~${Math.round(s.socialJetLag / 6) / 10}h on weekends. This fragments your circadian rhythm.` });
+  if (s.avgEff && s.avgEff < 85)
+    insights.push({ type: "info", text: `Avg efficiency ${Math.round(s.avgEff)}% (target ≥85%). Possible causes: late caffeine after 2pm, irregular schedule, screen use before bed.` });
+  const outliers = recs.filter(r => r.flags?.includes("outlier"));
+  if (outliers.length)
+    insights.push({ type: "info", text: `${outliers.length} night${outliers.length > 1 ? "s" : ""} flagged as outliers and excluded from averages. Review notes for those dates.` });
+  if (!insights.length && s.n >= 7)
+    insights.push({ type: "good", text: `${s.n} nights logged. Keep going — you need ≥15 for a reliable monthly average, ≥45 for quarterly.` });
+  return insights;
+}
+
+// ── Sleep render ──
+function renderSleep() {
+  renderSleepInsights();
+  renderSleepZoom(currentSleepZoom);
+}
+
+function renderSleepInsights() {
+  const el = document.querySelector("#sleepInsights");
+  if (!el) return;
+  const ins = getSleepInsights();
+  el.innerHTML = ins.map(i => `
+    <div class="sleep-insight sleep-insight-${i.type}">
+      <span class="si-icon">${i.type === "good" ? "✓" : i.type === "warn" ? "!" : "i"}</span>
+      <span>${i.text}</span>
+    </div>`).join("");
+}
+
+function renderSleepZoom(zoom) {
+  currentSleepZoom = zoom;
+  document.querySelectorAll(".zoom-tab").forEach(t => t.classList.toggle("active", t.dataset.zoom === zoom));
+  const el = document.querySelector("#sleepContent");
+  if (!el) return;
+  const recs = sleepRecs();
+  if (!recs.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">😴</div><div class="empty-title">No sleep logged yet</div><div class="empty-sub">Tap "+ Log sleep" to start. More nights = more meaningful patterns.</div></div>`;
+    return;
+  }
+  if (zoom === "day") el.innerHTML = renderSleepDay(recs);
+  else if (zoom === "week") el.innerHTML = renderSleepWeek(recs);
+  else if (zoom === "month") el.innerHTML = renderSleepMonth(recs);
+  else if (zoom === "quarter") el.innerHTML = renderSleepQuarter(recs);
+  else if (zoom === "year") el.innerHTML = renderSleepYear(recs);
+}
+
+function statCard(val, lbl, cls = "") {
+  return `<div class="sleep-stat"><div class="sleep-stat-val ${cls}">${val}</div><div class="sleep-stat-lbl">${lbl}</div></div>`;
+}
+
+function renderSleepDay(recs) {
+  const valid = validSleepRecs(recs);
+  const bestIds = new Set([...valid].sort((a, b) => (b.subjective_rating || 0) - (a.subjective_rating || 0) || b.total_sleep_min - a.total_sleep_min).slice(0, 3).map(r => r.id));
+  const worstIds = new Set([...valid].sort((a, b) => (a.subjective_rating || 10) - (b.subjective_rating || 10) || a.total_sleep_min - b.total_sleep_min).slice(0, 3).map(r => r.id));
+  const s = sleepStats(recs.slice(0, 14));
+  const rows = recs.slice(0, 21).map(r => {
+    const isOut = r.flags?.includes("outlier");
+    const cls = isOut ? "sleep-row outlier" : bestIds.has(r.id) ? "sleep-row best" : worstIds.has(r.id) ? "sleep-row worst" : "sleep-row";
+    const badge = isOut ? `<span class="sleep-badge badge-out">Outlier</span>` : bestIds.has(r.id) ? `<span class="sleep-badge badge-best">Top</span>` : worstIds.has(r.id) ? `<span class="sleep-badge badge-low">Low</span>` : "";
+    const rating = r.subjective_rating ? `<span class="sleep-chip">${r.subjective_rating}/10</span>` : "";
+    return `<div class="${cls}" data-edit-sleep="${r.id}">
+      <div class="sleep-row-top"><span class="sleep-row-date">${r.wake_date}${badge}</span><span class="sleep-row-times">${fmtBedtime(r.bedtime)} → ${fmtBedtime(r.wake_time)}</span></div>
+      <div class="sleep-row-metrics"><span class="sleep-chip">${fmtDur(r.total_sleep_min)}</span><span class="sleep-chip">${r.sleep_efficiency_pct != null ? r.sleep_efficiency_pct + "% eff" : "—"}</span>${rating}</div>
+      ${r.notes ? `<div class="sleep-row-notes">${esc(r.notes)}</div>` : ""}
+    </div>`;
+  }).join("");
+  return `<div class="sleep-stat-row">
+    ${statCard(fmtDur(Math.round(s.avgSleep || 0)), "Avg duration", s.avgSleep >= SLEEP_TARGET_MIN ? "good" : s.avgSleep ? "warn" : "")}
+    ${statCard(s.avgEff ? Math.round(s.avgEff) + "%" : "—", "Avg efficiency", s.avgEff >= 85 ? "good" : s.avgEff ? "warn" : "")}
+    ${statCard(s.pctGoodSleep + "%", "Nights ≥ 7h")}
+    ${statCard(s.avgRating ? (Math.round(s.avgRating * 10) / 10) + "/10" : "—", "Avg rating")}
+  </div><div class="sleep-log">${rows}</div>`;
+}
+
+function weekRow(label, s, note = "") {
+  const bvCls = s.bedVariability > 45 ? "warn" : s.bedVariability <= 20 ? "good" : "";
+  const sjlCls = s.socialJetLag > 60 ? "warn" : "";
+  return `<div class="sleep-period-row">
+    <div class="sleep-period-label">${label} <span class="sleep-period-n">${s.n} night${s.n !== 1 ? "s" : ""}</span></div>
+    ${note ? `<div class="sleep-period-note">${note}</div>` : ""}
+    <div class="swg">
+      ${statCard(fmtDur(Math.round(s.avgSleep || 0)), "Avg sleep", s.avgSleep >= SLEEP_TARGET_MIN ? "good" : s.avgSleep ? "warn" : "")}
+      ${statCard(s.bedVariability != null ? "±" + s.bedVariability + " min" : "—", "Bedtime variability", bvCls)}
+      ${statCard(s.socialJetLag != null ? s.socialJetLag + " min" : "—", "Social jet lag", sjlCls)}
+      ${statCard(s.pctGoodSleep + "%", "Nights ≥ 7h")}
+    </div>
+  </div>`;
+}
+
+function renderSleepWeek(recs) {
+  const weeks = {};
+  recs.forEach(r => { const k = isoWeek(new Date(r.wake_date + "T12:00")); (weeks[k] = weeks[k] || []).push(r); });
+  const keys = Object.keys(weeks).sort().reverse().slice(0, 12);
+  return `<div class="sleep-section-hdr">Weekly <span class="sleep-section-sub">ISO weeks Mon–Sun · Bedtime variability is the #1 predictor of quality</span></div>
+    ${keys.map(k => weekRow(k, sleepStats(weeks[k]))).join("")}`;
+}
+
+function renderSleepMonth(recs) {
+  const months = {};
+  recs.forEach(r => { const k = r.wake_date.slice(0, 7); (months[k] = months[k] || []).push(r); });
+  const keys = Object.keys(months).sort().reverse().slice(0, 12);
+  return `<div class="sleep-section-hdr">Monthly <span class="sleep-section-sub">≥ 15 nights/month for reliable averages</span></div>
+    ${keys.map(k => {
+      const s = sleepStats(months[k]);
+      const label = new Date(k + "-15").toLocaleDateString("en-US", { month: "long", year: "numeric" });
+      const daysInMonth = new Date(+k.slice(0, 4), +k.slice(5, 7), 0).getDate();
+      const comp = Math.round(s.n / daysInMonth * 100);
+      const compNote = comp < 70 ? `<span class="warn">⚠ ${comp}% complete — low completeness risks survivorship bias</span>` : `${comp}% complete`;
+      return weekRow(label, s, compNote);
+    }).join("")}`;
+}
+
+function renderSleepQuarter(recs) {
+  if (recs.length < 45) return `<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Need ${45 - recs.length} more nights</div><div class="empty-sub">Quarterly view needs ≥ 45 nights for a meaningful comparison. You have ${recs.length} so far.</div></div>`;
+  const quarters = {};
+  recs.forEach(r => { const d = new Date(r.wake_date + "T12:00"); const k = `${d.getFullYear()}-Q${Math.ceil((d.getMonth() + 1) / 3)}`; (quarters[k] = quarters[k] || []).push(r); });
+  return `<div class="sleep-section-hdr">Quarterly <span class="sleep-section-sub">Good for seasonal patterns (hot · rainy · cool season)</span></div>
+    ${Object.keys(quarters).sort().reverse().map(k => weekRow(k, sleepStats(quarters[k]))).join("")}`;
+}
+
+function renderSleepYear(recs) {
+  if (recs.length < 200) return `<div class="empty-state"><div class="empty-icon">📈</div><div class="empty-title">Need ${200 - recs.length} more nights</div><div class="empty-sub">Yearly view needs ≥ 200 same-device nights for a strong comparison. You have ${recs.length} so far — keep logging!</div></div>`;
+  const years = {};
+  recs.forEach(r => { const k = r.wake_date.slice(0, 4); (years[k] = years[k] || []).push(r); });
+  const yr = new Date().getFullYear().toString();
+  return `<div class="sleep-section-hdr">Yearly trajectory <span class="sleep-section-sub">Cross-device stage/HRV comparisons are unreliable</span></div>
+    ${Object.keys(years).sort().reverse().map(k => weekRow(k + (k === yr && years[k].length < 365 ? " (YTD)" : ""), sleepStats(years[k]))).join("")}`;
+}
+
+// ── Sleep modal ──
+function openSleepModal(id = "") {
+  const r = (state.sleep || []).find(s => s.id === id);
+  const now = new Date();
+  const toLocal = d => new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  document.querySelector("#sleepEditId").value = id;
+  document.querySelector("#sleepBedtime").value = r?.bedtime || toLocal(new Date(now - 8 * 3600000));
+  document.querySelector("#sleepWakeTime").value = r?.wake_time || toLocal(now);
+  document.querySelector("#sleepLatency").value = r?.sleep_latency_min ?? "";
+  document.querySelector("#sleepAwakenings").value = r?.awakenings ?? "";
+  document.querySelector("#sleepSource").value = r?.source || "manual";
+  document.querySelector("#sleepNotes").value = r?.notes || "";
+  document.querySelector("#deleteSleepBtn").hidden = !r;
+  const rr = document.querySelector("#sleepRatingRow");
+  rr.innerHTML = Array.from({ length: 10 }, (_, i) => i + 1).map(n =>
+    `<button type="button" class="rating-btn${r?.subjective_rating === n ? " sel" : ""}" data-rating="${n}">${n}</button>`).join("");
+  updateSleepCalc();
+  document.querySelector("#sleepModal")?.showModal();
+}
+
+function updateSleepCalc() {
+  const bed = document.querySelector("#sleepBedtime")?.value;
+  const wake = document.querySelector("#sleepWakeTime")?.value;
+  const lat = parseInt(document.querySelector("#sleepLatency")?.value) || 0;
+  const calc = calcSleepFields(bed, wake, lat);
+  const el = document.querySelector("#sleepCalc");
+  if (!el) return;
+  if (!calc) { el.innerHTML = ""; return; }
+  const ec = calc.sleep_efficiency_pct >= 85 ? "good" : calc.sleep_efficiency_pct >= 70 ? "" : "warn";
+  el.innerHTML = `<div class="sleep-calc"><span>In bed: <strong>${fmtDur(calc.time_in_bed_min)}</strong></span><span>Asleep: <strong>${fmtDur(calc.total_sleep_min)}</strong></span><span class="${ec}">Efficiency: <strong>${calc.sleep_efficiency_pct}%</strong></span></div>`;
+}
+
+function saveSleepRecord(e) {
+  e.preventDefault();
+  const bed = document.querySelector("#sleepBedtime").value;
+  const wake = document.querySelector("#sleepWakeTime").value;
+  const lat = parseInt(document.querySelector("#sleepLatency").value) || 0;
+  const calc = calcSleepFields(bed, wake, lat);
+  if (!calc) { alert("Check bedtime and wake time — wake must be after bedtime."); return; }
+  const rating = parseInt(document.querySelector(".rating-btn.sel")?.dataset.rating) || null;
+  const record = {
+    id: document.querySelector("#sleepEditId").value || `sleep-${Date.now()}`,
+    wake_date: wake.slice(0, 10),
+    bedtime: bed, wake_time: wake,
+    ...calc,
+    sleep_latency_min: lat || null,
+    awakenings: parseInt(document.querySelector("#sleepAwakenings").value) || null,
+    subjective_rating: rating,
+    source: document.querySelector("#sleepSource").value,
+    notes: document.querySelector("#sleepNotes").value.trim(),
+    flags: []
+  };
+  record.flags = flagSleepRecord(record);
+  state.sleep = state.sleep || [];
+  const idx = state.sleep.findIndex(r => r.id === record.id);
+  if (idx >= 0) state.sleep[idx] = record; else state.sleep.push(record);
+  save();
+  renderSleep();
+  e.target.closest("dialog")?.close();
+}
+
+function deleteSleepRecord(id) {
+  if (!id || !confirm("Delete this sleep entry?")) return;
+  state.sleep = (state.sleep || []).filter(r => r.id !== id);
+  save();
+  renderSleep();
+  document.querySelector("#sleepModal")?.close();
 }
 
 // ── Render all ──
@@ -463,6 +816,7 @@ function renderAll() {
   updateRewardUI();
   renderComments();
   renderHeatmap();
+  renderSleep();
 }
 
 // ── Events ──
@@ -554,6 +908,32 @@ function bindEvents() {
       selectedDiff = Number(diffBtn.dataset.diff);
       return;
     }
+
+    // Sleep: log button
+    if (e.target.closest("#logSleepBtn")) { openSleepModal(); return; }
+
+    // Sleep: zoom tabs
+    const zoomTab = e.target.closest(".zoom-tab");
+    if (zoomTab) { renderSleepZoom(zoomTab.dataset.zoom); return; }
+
+    // Sleep: click row to edit
+    const sleepRow = e.target.closest("[data-edit-sleep]");
+    if (sleepRow) { openSleepModal(sleepRow.dataset.editSleep); return; }
+
+    // Sleep: rating buttons
+    const ratingBtn = e.target.closest(".rating-btn");
+    if (ratingBtn) {
+      document.querySelectorAll(".rating-btn").forEach(b => b.classList.remove("sel"));
+      ratingBtn.classList.add("sel");
+      return;
+    }
+
+    // Sleep: delete button
+    if (e.target.closest("#deleteSleepBtn")) {
+      const id = document.querySelector("#sleepEditId")?.value;
+      deleteSleepRecord(id);
+      return;
+    }
   });
 
   // Habit form submit
@@ -587,7 +967,8 @@ function bindEvents() {
     const name = document.querySelector("#rewardName").value.trim() || "New reward";
     const price = Math.max(1, Number(document.querySelector("#rewardPrice").value) || 1);
     const emoji = document.querySelector("#rewardEmoji").value || "🎁";
-    const payload = { name, emoji, price, currency: document.querySelector("#rewardCurrency").value, target: price * 5, eta: "New", img: "" };
+    const currency = document.querySelector("#rewardCurrency").value || state.currency || "USD";
+    const payload = { name, emoji, price, currency, target: coinsFromPrice(price, currency), eta: "New", img: "" };
     const existing = state.rewards.find(r => r.id === editId);
     if (existing) {
       Object.assign(existing, payload);
@@ -602,6 +983,9 @@ function bindEvents() {
     save();
     e.target.closest("dialog")?.close();
   });
+
+  // Sleep form submit
+  document.querySelector("#sleepForm")?.addEventListener("submit", saveSleepRecord);
 
   // Delete habit
   document.querySelector("#deleteHabit")?.addEventListener("click", () => {
@@ -685,6 +1069,12 @@ function bindEvents() {
   window.matchMedia?.("(prefers-color-scheme: dark)")?.addEventListener("change", () => {
     if ((document.documentElement.dataset.themeMode || "system") === "system") applyTheme("system");
   });
+
+  // Settings default currency
+  document.querySelector("#settingsCurrency")?.addEventListener("change", e => {
+    state.currency = e.target.value;
+    save();
+  });
 }
 
 // ── Dialog polyfill (browsers without native <dialog> support) ──
@@ -714,6 +1104,10 @@ load();
 setDate();
 bindEvents();
 renderAll();
+
+// Sync settings currency select to saved state
+const settingsCurrEl = document.querySelector("#settingsCurrency");
+if (settingsCurrEl) settingsCurrEl.value = state.currency || "USD";
 
 const urlScreen = new URLSearchParams(location.search).get("screen");
 const started = localStorage.getItem(STARTED_KEY) === "1";

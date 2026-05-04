@@ -146,28 +146,28 @@
           <div style="font-size:20px;font-weight:740;margin-bottom:6px">Pick your starters</div>
           <div style="font-size:13px;color:var(--muted);margin-bottom:16px">You can add, rename, or remove habits anytime.</div>
           <div class="starter-grid">
-            <button class="starter-btn sel" onclick="this.classList.toggle('sel')">
+            <button class="starter-btn sel" onclick="this.classList.toggle('sel');updateStarterCount()">
               <div class="starter-emoji">💧</div>
               <div class="starter-name">Drink water</div>
               <div class="starter-note">8 glasses / day</div>
             </button>
-            <button class="starter-btn" onclick="this.classList.toggle('sel')">
+            <button class="starter-btn" onclick="this.classList.toggle('sel');updateStarterCount()">
               <div class="starter-emoji">🏋️</div>
               <div class="starter-name">Workout</div>
               <div class="starter-note">Daily session</div>
             </button>
-            <button class="starter-btn sel" onclick="this.classList.toggle('sel')">
+            <button class="starter-btn sel" onclick="this.classList.toggle('sel');updateStarterCount()">
               <div class="starter-emoji">📖</div>
               <div class="starter-name">Read</div>
               <div class="starter-note">30 min</div>
             </button>
-            <button class="starter-btn" onclick="this.classList.toggle('sel')">
+            <button class="starter-btn" onclick="this.classList.toggle('sel');updateStarterCount()">
               <div class="starter-emoji">🧘</div>
               <div class="starter-name">Meditate</div>
               <div class="starter-note">10 min</div>
             </button>
           </div>
-          <button class="btn btn-primary btn-full" style="margin-top:auto" data-start>Continue · 2 selected</button>
+          <button class="btn btn-primary btn-full" style="margin-top:auto" data-start data-starter-continue>Continue · 2 selected</button>
         </div>
 
         <!-- Phone 3: Set reward -->
@@ -177,11 +177,24 @@
           <div style="font-size:13px;color:var(--muted);margin-bottom:16px">One concrete reward. Specific beats vague.</div>
           <div class="form-field">
             <label class="form-label">Reward name</label>
-            <input class="form-input" type="text" value="Sony WH-1000XM5" />
+            <input class="form-input" id="onboardRewardName" type="text" placeholder="e.g. Sony WH-1000XM5" />
           </div>
           <div class="form-field">
-            <label class="form-label">Price (USD)</label>
-            <input class="form-input" type="number" value="399" />
+            <label class="form-label">Currency</label>
+            <select class="form-input" id="onboardRewardCurrency">
+              <option value="USD">USD – US Dollar ($)</option>
+              <option value="THB">THB – Thai Baht (฿)</option>
+              <option value="EUR">EUR – Euro (€)</option>
+              <option value="GBP">GBP – British Pound (£)</option>
+              <option value="JPY">JPY – Japanese Yen (¥)</option>
+              <option value="SGD">SGD – Singapore Dollar (S$)</option>
+              <option value="AUD">AUD – Australian Dollar (A$)</option>
+              <option value="CNY">CNY – Chinese Yuan (¥)</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Price</label>
+            <input class="form-input" id="onboardRewardPrice" type="number" placeholder="e.g. 399" />
           </div>
           <div class="coin-preview">
             <div class="coin-cell">
@@ -485,31 +498,88 @@
     <!-- ── Sleep ── -->
     <section class="screen" id="screen-sleep">
       <div class="page-header">
-        <div><div class="page-sub">Sleep analysis</div><div class="page-title">Sleep</div></div>
+        <div><div class="page-sub">Multi-resolution analysis</div><div class="page-title">Sleep</div></div>
+        <button class="btn btn-primary btn-sm" id="logSleepBtn">+ Log sleep</button>
       </div>
-      <div class="sleep-grid">
-        <div class="card sleep-score">
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--faint);margin-bottom:8px">Sleep score</div>
-          <div class="sleep-score-num">82</div>
-          <div class="sleep-score-lbl">7h 12m · 91% efficiency</div>
-        </div>
-        <div class="card chart-card">
-          <div class="chart-title">Sleep stages</div>
-          <div class="stage-bar" style="margin-bottom:10px">
-            <span class="stage-rem" style="width:22%">REM</span>
-            <span class="stage-deep" style="width:18%">Deep</span>
-            <span class="stage-light" style="width:52%">Light</span>
-            <span class="stage-awake" style="width:8%">Awake</span>
-          </div>
-          <div style="font-size:12px;color:var(--muted)">38 min sleep debt</div>
-        </div>
-        <div class="card chart-card">
-          <div class="chart-title">Suggestions</div>
-          <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:10px">Wind down at 10:15 PM. Dim lights, avoid late caffeine, protect a consistent wake time.</div>
-          <div style="font-size:11px;color:var(--faint);line-height:1.4">Suggestions are informational. Consult a clinician for medical concerns.</div>
-        </div>
+
+      <!-- Zoom tabs -->
+      <div class="zoom-tabs">
+        <button class="zoom-tab active" data-zoom="day">Day</button>
+        <button class="zoom-tab" data-zoom="week">Week</button>
+        <button class="zoom-tab" data-zoom="month">Month</button>
+        <button class="zoom-tab" data-zoom="quarter">Quarter</button>
+        <button class="zoom-tab" data-zoom="year">Year</button>
+      </div>
+
+      <!-- Auto-generated insights -->
+      <div id="sleepInsights" class="sleep-insights-wrap"></div>
+
+      <!-- Dynamic content per zoom level -->
+      <div id="sleepContent" class="sleep-content"></div>
+
+      <div style="margin-top:20px;font-size:11px;color:var(--faint);line-height:1.5">
+        Method: Multi-Resolution Sleep Analysis · Stage breakdowns are device estimates, not clinical measurements · Not a diagnostic tool
       </div>
     </section>
+
+    <!-- ── Sleep Log Modal ── -->
+    <dialog id="sleepModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title">Log sleep</div>
+          <button type="button" class="btn-icon" data-close-dialog>
+            <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <form id="sleepForm">
+          <input type="hidden" id="sleepEditId" />
+          <div class="form-row-2">
+            <div class="form-field">
+              <label class="form-label">Bedtime</label>
+              <input class="form-input" type="datetime-local" id="sleepBedtime" oninput="updateSleepCalc()" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Wake time</label>
+              <input class="form-input" type="datetime-local" id="sleepWakeTime" oninput="updateSleepCalc()" />
+            </div>
+          </div>
+          <div id="sleepCalc"></div>
+          <div class="form-field">
+            <label class="form-label">How rested did you feel? <span style="color:var(--faint);font-weight:400">(1 = terrible · 10 = perfect)</span></label>
+            <div class="rating-row" id="sleepRatingRow"></div>
+          </div>
+          <div class="form-row-2">
+            <div class="form-field">
+              <label class="form-label">Mins to fall asleep</label>
+              <input class="form-input" type="number" id="sleepLatency" min="0" max="180" placeholder="e.g. 15" oninput="updateSleepCalc()" />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Times woken up</label>
+              <input class="form-input" type="number" id="sleepAwakenings" min="0" max="20" placeholder="e.g. 1" />
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Data source</label>
+            <select class="form-input" id="sleepSource">
+              <option value="manual">Manual / estimated</option>
+              <option value="apple-watch">Apple Watch</option>
+              <option value="fitbit">Fitbit</option>
+              <option value="garmin">Garmin</option>
+              <option value="oura">Oura Ring</option>
+              <option value="phone">Phone app (Sleep Cycle / Pillow)</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Notes <span style="color:var(--faint);font-weight:400">illness · alcohol · travel · stress</span></label>
+            <textarea class="form-input" id="sleepNotes" rows="2" placeholder="What might explain tonight's sleep?"></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" id="deleteSleepBtn" hidden>Delete</button>
+            <button type="submit" class="btn btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
 
     <!-- ── Pricing ── -->
     <section class="screen" id="screen-pricing">
@@ -604,8 +674,15 @@
           <div class="settings-card-title">Rewards</div>
           <div class="form-field">
             <label class="form-label">Default currency</label>
-            <select class="form-input">
-              <option>USD</option><option>THB</option><option>EUR</option><option>GBP</option>
+            <select class="form-input" id="settingsCurrency">
+              <option value="USD">USD – US Dollar ($)</option>
+              <option value="THB">THB – Thai Baht (฿)</option>
+              <option value="EUR">EUR – Euro (€)</option>
+              <option value="GBP">GBP – British Pound (£)</option>
+              <option value="JPY">JPY – Japanese Yen (¥)</option>
+              <option value="SGD">SGD – Singapore Dollar (S$)</option>
+              <option value="AUD">AUD – Australian Dollar (A$)</option>
+              <option value="CNY">CNY – Chinese Yuan (¥)</option>
             </select>
           </div>
           <div class="switch-row"><span>Hide prices on home</span><input type="checkbox" /></div>
@@ -725,7 +802,16 @@
       </div>
       <div class="form-field">
         <label class="form-label">Currency</label>
-        <select class="form-input" id="rewardCurrency"><option>USD</option><option>THB</option><option>EUR</option></select>
+        <select class="form-input" id="rewardCurrency" onchange="updateConversion()">
+          <option value="USD">USD ($)</option>
+          <option value="THB">THB (฿)</option>
+          <option value="EUR">EUR (€)</option>
+          <option value="GBP">GBP (£)</option>
+          <option value="JPY">JPY (¥)</option>
+          <option value="SGD">SGD (S$)</option>
+          <option value="AUD">AUD (A$)</option>
+          <option value="CNY">CNY (¥)</option>
+        </select>
       </div>
     </div>
     <div class="form-field">
