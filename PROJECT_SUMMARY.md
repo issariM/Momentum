@@ -1,90 +1,119 @@
-# Momentum — Project Summary
+# Momentum — Habit Tracker PWA
+
+**Live URL:** https://habittrackerfromclaudecode.netlify.app
+**GitHub:** https://github.com/issariM/Momentum
+**Deploy:** Push to `main` via GitHub Desktop → Netlify auto-deploys (~1 min)
+
+---
 
 ## What it is
-A habit tracking PWA (Progressive Web App) that turns daily habits into coins toward real-world rewards. Installable on iPhone/Android from the browser — no app store needed.
+A Progressive Web App for habit tracking with a coin-reward motivation system. Complete daily habits → earn coins → unlock real-world rewards from your wishlist.
+
+---
+
+## Install on any device
+| Device | How |
+|---|---|
+| iPhone / iPad | Safari → Share button → Add to Home Screen |
+| Mac | Safari → Share button → Add to Dock |
+| Android Chrome | Browser menu → Install app (or tap banner) |
+| Desktop Chrome / Edge | Install icon in address bar |
+| Firefox (any) | Bookmark it — Firefox does not support PWA install |
+
+---
+
+## Features
+
+### Habits
+- Add habits with emoji, difficulty, coin reward, and daily target
+- Tap to complete (binary) or use +/− counter (quantity-based)
+- Streaks tracked per habit
+
+### Rewards / Wishlist
+- Add rewards with name, price, and currency
+- Coins accumulate toward your primary reward
+- Celebrate unlock with confetti animation
+
+### Multi-Currency
+Supported: USD ($), THB (฿), EUR (€), GBP (£), JPY (¥), SGD (S$), AUD (A$), CNY (¥)
+
+**Coin conversion — 1 USD = 5 coins base rate:**
+| Currency | FX Rate (to USD) | Example |
+|---|---|---|
+| USD | 1 | $100 → 500 coins |
+| THB | 33 | ฿3,300 → 500 coins |
+| EUR | 0.93 | €93 → 500 coins |
+| GBP | 0.79 | £79 → 500 coins |
+| JPY | 149 | ¥14,900 → 500 coins |
+
+Currency set globally in Settings or per-reward when adding/editing.
+
+---
+
+### Sleep Analysis (Multi-Resolution Method)
+Based on peer-reviewed sleep research (PSG validation studies, social jet lag literature).
+
+**5 zoom levels — each reveals what the others hide:**
+- **Day** — each logged night: duration, efficiency, rating, notes. Best/worst flagged.
+- **Week** — bedtime variability (±min), social jet lag, % nights ≥7h
+- **Month** — monthly averages + completeness % (warns survivorship bias if < 70%)
+- **Quarter** — seasonal patterns; needs ≥45 nights
+- **Year** — multi-year trajectory; needs ≥200 same-device nights
+
+**Log each night:**
+- Bedtime + wake time → auto-calculates duration and efficiency
+- Subjective rating 1–10 (research shows this tracks recovery better than device scores)
+- Minutes to fall asleep, times woken up
+- Data source: Apple Watch / Fitbit / Garmin / Oura / Phone app / Manual
+- Free-text notes (illness, alcohol, travel, stress)
+
+**Auto-insights engine:**
+- Bedtime variability warning (> ±45 min)
+- Social jet lag alert (weekday vs weekend bedtime shift > 1h)
+- Sleep duration below 7h target
+- Efficiency below 85% threshold
+- Outlier detection: < 3h or > 12h flagged, excluded from averages
+
+**Key research finding:** Bedtime/wake-time *consistency* predicts sleep quality better than total duration. Watch the variability column at every zoom level.
+
+---
+
+### PWA & Offline
+- Works fully offline (service worker, cache-first strategy)
+- Installable on all platforms with platform-specific install guide modal
+- App shortcuts for Today and Rewards screens
+- iOS meta tags for full-screen standalone mode
+
+---
+
+## Onboarding
+New users see a 3-panel welcome screen:
+1. Enter name
+2. Pick starter habits (Drink water, Workout, Read, Meditate)
+3. Set first reward — choose currency and price
+
+Starts completely clean — no demo data.
+
+---
 
 ## File Structure
 ```
-Projects/Momentum/
-├── index.html          # Full UI — all screens, modals, navigation
-├── styles.css          # Design system — light/dark mode, responsive layout
-├── script.js           # All logic — state, habits, rewards, routing, events
-├── sw.js               # Service worker — offline caching
-├── manifest.webmanifest # PWA manifest — install metadata
-├── icon.svg            # App icon
-└── PROJECT_SUMMARY.md  # This file
+index.html            — all UI markup
+script.js             — all app logic (vanilla JS, localStorage)
+styles.css            — design system + component styles
+sw.js                 — service worker (cache-first, offline fallback)
+manifest.webmanifest  — PWA manifest with app shortcuts
+icon-192.png          — required for Chrome/Android install prompt
+icon-512.png          — required for splash screens
+icon.svg              — vector icon (any size)
+PROJECT_SUMMARY.md    — this file
 ```
 
-## Tech Stack
-- **Pure HTML/CSS/JS** — no framework, no build step
-- **PWA** — service worker + manifest = installable on any device
-- **localStorage** — local-first, data persists in browser (no backend)
-- **Unsplash** — reward images via URL (no upload needed)
+## Data Storage
+All data in browser `localStorage` under key `momentum-v1`. No server, no account.
 
-## Architecture: State + Render
-```
-state {}  →  render functions  →  DOM
-              ↑ events mutate state + call save() + re-render
-```
-- `state` object holds all data (habits, rewards, coins, comments, profile)
-- `save()` / `load()` sync to `localStorage` key `momentum-v1`
-- `renderHabits()`, `renderRewards()`, `updateRewardUI()`, `renderComments()` rebuild DOM on change
-- `switchScreen(name)` toggles `.active` class on screens and nav links
+Export via Settings → Export (JSON or CSV).
 
-## Coin System
-- 1 USD = 5 coins (configurable)
-- Each habit has a coin value (Easy=10, Medium=25, Hard=50, Very hard=100)
-- Completing a habit adds coins to today's total AND primary reward progress
-- Reward unlocks when `current >= target` → celebration modal fires
+---
 
-## Screens (sidebar nav + mobile tabbar)
-| Screen | Key content |
-|---|---|
-| `onboarding` | 3-phone mockup, name input, starter habits, reward setup |
-| `today` | Hero reward bar, 4 stat cards, habit list |
-| `rewards` | Primary detail, all rewards grid, earned history |
-| `insights` | Stats, line chart, bar chart, 28-day heatmap |
-| `habits` | Full habit directory |
-| `tasks` | Task list with status chips |
-| `projects` | Multi-tracker project cards |
-| `fitness` | Workout log, volume chart, body metrics |
-| `sleep` | Sleep score, stages bar, suggestions |
-| `pricing` | Free vs Plus comparison |
-| `integrations` | 8 integration cards |
-| `feedback` | Comment box + comment list |
-| `settings` | Appearance, notifications, rewards, privacy, data |
-
-## Responsive Behavior
-- **Desktop (>860px):** sidebar + content grid
-- **Mobile (≤860px):** sidebar hidden, bottom tabbar shown (5 tabs), single-column layout
-
-## Modals
-- `#habitModal` — add/edit habit: name, frequency, target, difficulty (coin value), emoji
-- `#rewardModal` — add/edit reward: name, price, currency, emoji → auto-converts to coin target
-- `#celebrationModal` — fires when primary reward coins reach target
-
-## Key State Shape
-```js
-state = {
-  primaryRewardId: "sony",
-  todayCoins: 42,
-  unlocked: false,
-  profile: { name: "" },
-  rewards: [{ id, name, emoji, price, currency, current, target, eta, img }],
-  habits:  [{ id, name, emoji, target, count, coins, streak, difficulty }],
-  comments: [{ author, text }]
-}
-```
-
-## To Deploy (free, no domain needed)
-1. **Netlify Drop:** drag the `Momentum/` folder to app.netlify.com/drop → get a `.netlify.app` URL
-2. **Vercel:** import folder → deploy → get a `.vercel.app` URL
-3. Open the URL on phone → install via Share > Add to Home Screen (iPhone) or browser menu (Android)
-
-## What's NOT built yet (future)
-- Backend / cloud sync
-- User accounts / auth
-- Push notifications
-- Real health app integrations (Apple Health, etc.)
-- Cross-device data sync
-- Payments / subscription enforcement
+*Last updated: May 5, 2026*
