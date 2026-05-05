@@ -1,9 +1,38 @@
-const STORAGE_KEY = "momentum-v1";
-const STARTED_KEY = "momentum-started-v1";
-const AUTH_KEY = "momentum-auth-v1";
+const STORAGE_KEY  = "momentum-v1";
+const STARTED_KEY  = "momentum-started-v1";
+const ACCOUNTS_KEY = "momentum-accounts-v1";
+const SESSION_KEY  = "momentum-session-v1";
 
 function isInstalledPWA() {
   return window.matchMedia("(display-mode: standalone)").matches || !!navigator.standalone;
+}
+
+// ── Local account auth ──
+function loadAccounts() {
+  try { return JSON.parse(localStorage.getItem(ACCOUNTS_KEY)) || []; } catch { return []; }
+}
+function saveAccounts(a) { localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(a)); }
+
+async function hashPwd(pwd) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pwd));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+function getSession() {
+  try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; }
+}
+function setSession(data) { localStorage.setItem(SESSION_KEY, JSON.stringify(data)); }
+function clearSession()   { localStorage.removeItem(SESSION_KEY); }
+
+function showAuthError(id, msg) {
+  const el = document.querySelector(`#${id}`);
+  if (!el) return;
+  el.textContent = msg;
+  el.hidden = false;
+}
+function clearAuthError(id) {
+  const el = document.querySelector(`#${id}`);
+  if (el) el.hidden = true;
 }
 
 // Exchange rates: how many units of each currency = 1 USD
@@ -68,10 +97,10 @@ function save() {
 function reset() {
   state = structuredClone(defaultState);
   localStorage.removeItem(STARTED_KEY);
-  localStorage.removeItem(AUTH_KEY);
+  clearSession();
   save();
   renderAll();
-  switchScreen(isInstalledPWA() ? "signin" : "install");
+  switchScreen(isInstalledPWA() ? "login" : "install");
 }
 
 // ── Theme ──
@@ -102,7 +131,7 @@ function cycleTheme() {
 }
 
 // ── Screen routing ──
-const PREAUTH_SCREENS = new Set(["install", "signin"]);
+const PREAUTH_SCREENS = new Set(["install", "login", "signup"]);
 function switchScreen(name) {
   document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === `screen-${name}`));
   document.querySelectorAll("[data-screen]").forEach(b => b.classList.toggle("active", b.dataset.screen === name));
@@ -826,20 +855,56 @@ function renderAll() {
   renderSleep();
 }
 
-// ── Sign in ──
-function doSignin() {
-  const name = document.querySelector("#signinName")?.value.trim();
-  if (!name) {
-    document.querySelector("#signinName")?.focus();
-    return;
-  }
-  state.profile.name = name;
-  localStorage.setItem(AUTH_KEY, "1");
+// ── Login ──
+async function doLogin() {
+  clearAuthError("loginError");
+  const email = document.querySelector("#loginEmail")?.value.trim();
+  const pwd   = document.querySelector("#loginPassword")?.value;
+  if (!email || !pwd) { showAuthError("loginError", "Please enter your email and password."); return; }
+
+  const hash     = await hashPwd(pwd);
+  const accounts = loadAccounts();
+  const account  = accounts.find(a => a.email === email && a.hash === hash);
+  if (!account) { showAuthError("loginError", "Email or password is incorrect."); return; }
+
+  state.profile.name = account.name;
+  setSession({ id: account.id, email: account.email, name: account.name });
   save();
-  // Show name on activate screen
+  enterApp(account.name);
+}
+
+// ── Sign up ──
+async function doSignup() {
+  clearAuthError("signupError");
+  const name = document.querySelector("#signupName")?.value.trim();
+  const email = document.querySelector("#signupEmail")?.value.trim();
+  const pwd   = document.querySelector("#signupPassword")?.value;
+
+  if (!name)                         { showAuthError("signupError", "Please enter your name."); return; }
+  if (!email || !email.includes("@")){ showAuthError("signupError", "Please enter a valid email."); return; }
+  if (!pwd || pwd.length < 6)        { showAuthError("signupError", "Password must be at least 6 characters."); return; }
+
+  const accounts = loadAccounts();
+  if (accounts.find(a => a.email === email)) {
+    showAuthError("signupError", "An account with this email already exists."); return;
+  }
+
+  const hash    = await hashPwd(pwd);
+  const account = { id: `u-${Date.now()}`, name, email, hash };
+  accounts.push(account);
+  saveAccounts(accounts);
+
+  state.profile.name = name;
+  setSession({ id: account.id, email, name });
+  save();
+  enterApp(name);
+}
+
+function enterApp(name) {
   const nameEl = document.querySelector("#activateName");
   if (nameEl) nameEl.textContent = name;
-  switchScreen("onboarding");
+  const started = localStorage.getItem(STARTED_KEY) === "1";
+  switchScreen(started ? "today" : "onboarding");
 }
 
 // ── Events ──
@@ -855,15 +920,34 @@ function bindEvents() {
     // Install screen: native prompt
     if (e.target.closest("#installScreenNativeBtn")) { requestInstall(); return; }
 
-    // Install screen: already installed / open
+    // Install screen: already installed / skip
     if (e.target.closest("#installDoneBtn") || e.target.closest("#installSkipBtn")) {
-      switchScreen("signin");
-      setTimeout(() => document.querySelector("#signinName")?.focus(), 50);
+      switchScreen("login");
+      setTimeout(() => document.querySelector("#loginEmail")?.focus(), 50);
       return;
     }
 
-    // Sign in
-    if (e.target.closest("#signinBtn")) { doSignin(); return; }
+    // Login / Signup
+    if (e.target.closest("#loginBtn"))    { doLogin(); return; }
+    if (e.target.closest("#signupBtn"))   { doSignup(); return; }
+    if (e.target.closest("#goSignupBtn")) {
+      switchScreen("signup");
+      setTimeout(() => document.querySelector("#signupName")?.focus(), 50);
+      return;
+    }
+    if (e.target.closest("#goLoginBtn")) {
+      switchScreen("login");
+      setTimeout(() => document.querySelector("#loginEmail")?.focus(), 50);
+      return;
+    }
+    if (e.target.closest("#googleSigninBtn")) {
+      alert("Google sign-in is coming in the cloud version of Momentum!");
+      return;
+    }
+    if (e.target.closest("#forgotPasswordBtn")) {
+      alert("This is a local account — passwords cannot be recovered.\n\nTo start fresh: Settings → Reset all data.");
+      return;
+    }
 
     // Install guide modal
     if (e.target.closest("[data-install-guide]")) { showInstallModal(); return; }
@@ -1088,9 +1172,12 @@ function bindEvents() {
     if (confirm("Reset all data on this device?")) reset();
   });
 
-  // Sign in: Enter key
-  document.querySelector("#signinName")?.addEventListener("keydown", e => {
-    if (e.key === "Enter") doSignin();
+  // Login / signup: Enter key
+  document.querySelector("#loginPassword")?.addEventListener("keydown", e => {
+    if (e.key === "Enter") doLogin();
+  });
+  document.querySelector("#signupPassword")?.addEventListener("keydown", e => {
+    if (e.key === "Enter") doSignup();
   });
 
   // PWA install (Chrome/Edge fires this when app is installable)
@@ -1105,8 +1192,8 @@ function bindEvents() {
     deferredInstall = null;
     document.querySelectorAll("#headerInstallBtn, #installBtn, .install-banner").forEach(el => { if (el) el.hidden = true; });
     if (document.querySelector("#screen-install.active")) {
-      switchScreen("signin");
-      setTimeout(() => document.querySelector("#signinName")?.focus(), 50);
+      switchScreen("login");
+      setTimeout(() => document.querySelector("#loginEmail")?.focus(), 50);
     }
   });
 
@@ -1155,28 +1242,26 @@ const settingsCurrEl = document.querySelector("#settingsCurrency");
 if (settingsCurrEl) settingsCurrEl.value = state.currency || "USD";
 
 const urlScreen = new URLSearchParams(location.search).get("screen");
-const _started   = localStorage.getItem(STARTED_KEY) === "1";
-const _signedIn  = localStorage.getItem(AUTH_KEY) === "1";
-const _pwa       = isInstalledPWA();
+const _started  = localStorage.getItem(STARTED_KEY) === "1";
+const _session  = getSession();
+const _pwa      = isInstalledPWA();
 
-if (_started) {
-  // Returning user — show activate name if somehow revisiting onboarding
+if (_session && _started) {
   const nameEl = document.querySelector("#activateName");
   if (nameEl && state.profile.name) nameEl.textContent = state.profile.name;
   switchScreen(urlScreen || "today");
-} else if (!_pwa && !_signedIn) {
+} else if (!_pwa && !_session) {
   switchScreen("install");
-} else if (!_signedIn) {
-  switchScreen("signin");
-  setTimeout(() => document.querySelector("#signinName")?.focus(), 50);
+} else if (!_session) {
+  switchScreen("login");
+  setTimeout(() => document.querySelector("#loginEmail")?.focus(), 50);
 } else {
-  // Signed in but not activated (e.g. refresh mid-onboarding)
+  // Session exists but not yet activated
   const nameEl = document.querySelector("#activateName");
   if (nameEl && state.profile.name) nameEl.textContent = state.profile.name;
   switchScreen("onboarding");
 }
 
-// Hide install UI if already running as installed app
 if (_pwa) {
   document.querySelectorAll("#headerInstallBtn, #installBtn, .install-banner").forEach(el => { if (el) el.hidden = true; });
 }

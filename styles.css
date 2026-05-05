@@ -220,6 +220,104 @@ img { display: block; max-width: 100%; }
 }
 .preauth-skip:hover { color: var(--muted); }
 
+/* ── Login / Signup forms ── */
+.preauth-logo--circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #1a1a2e;
+  margin-bottom: 20px;
+}
+.preauth-logo--circle svg { width: 36px; height: 36px; }
+
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 120ms;
+}
+.btn-google:hover { background: var(--surface-soft); }
+
+.auth-form-wrap { width: 100%; display: flex; flex-direction: column; }
+
+.input-icon-wrap { position: relative; }
+.input-icon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.form-input--icon { padding-left: 40px; }
+
+.btn-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: var(--radius);
+  background: #0f0f13;
+  color: #fff;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 120ms;
+}
+.btn-dark:hover { opacity: 0.85; }
+:root[data-theme="dark"] .btn-dark { background: #f1f0ec; color: #0d0d0f; }
+
+.auth-error {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--danger);
+  margin-bottom: 12px;
+}
+
+.auth-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--muted);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.auth-footer-link {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+.auth-footer-link:hover { color: var(--text); }
+.auth-footer-link--bold { color: var(--text); font-weight: 600; }
+.auth-footer-link--bold:hover { color: var(--accent); }
+
 /* ── Main ── */
 .main {
   display: flex;
